@@ -11,7 +11,7 @@ Writeup challenge **`Nonce-nse`**.
 | 🏆 **Event**     | `GEMASTIK XIX 2026`      | 📅 **Date**    | `2026-08-24`                        |
 | 🏷️ **Category** | `crypto`                 | 💯 **Points**  | `500`                               |
 | ⭐ **Difficulty** | ★★★☆☆                    | 👤 **Author**  | `ac3`                               |
-| 🧑‍💻 **Team**    | `<isi nama tim>`         | 🛠️ **Tools**  | `SageMath, pycryptodome`            |
+| 🧑‍💻 **Team**    | `DOSCOM Zero Day Scholars` (nexsus404)         | 🛠️ **Tools**  | `SageMath, pycryptodome`            |
 | 🔖 **Tags**      | `#ecdsa` `#hnp` `#lattice` `#lll` `#secp256k1` | | |
 | 🤖 **AI Source** | https://share.gemini.google/EnHFKP9tDmzz | 🧩 **Solver** | [`solve-dsoal-nonce.sg`](solve-dsoal-nonce.sg) |
 

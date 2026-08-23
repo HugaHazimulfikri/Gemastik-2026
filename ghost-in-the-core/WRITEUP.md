@@ -11,7 +11,7 @@ Writeup challenge **`Ghost in the Core`**.
 | 🏆 **Event**     | `GEMASTIK XIX 2026`      | 📅 **Date**    | `2026-08-24`                        |
 | 🏷️ **Category** | `forensics`              | 💯 **Points**  | `384`                               |
 | ⭐ **Difficulty** | ★★★★☆                    | 👤 **Author**  | `aodreamer`                         |
-| 🧑‍💻 **Team**    | `<isi nama tim>`         | 🛠️ **Tools**  | `readelf, objdump, gdb, python (stdlib)` |
+| 🧑‍💻 **Team**    | `DOSCOM Zero Day Scholars` (nexsus404)         | 🛠️ **Tools**  | `readelf, objdump, gdb, python (stdlib)` |
 | 🤖 **AI Source** | https://share.gemini.google/v7qNRRJBIv7c | 🧩 **Solver** | [`ghost-solved.py`](ghost-solved.py) |
 | 🔖 **Tags**      | `#core-dump` `#fileless` `#rc4` `#pcap` `#env-var` | | |
 

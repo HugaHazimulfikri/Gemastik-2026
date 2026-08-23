@@ -11,7 +11,7 @@ Writeup challenge **`Cinder`**.
 | 🏆 **Event**     | `GEMASTIK XIX 2026`      | 📅 **Date**    | `2026-08-24`                        |
 | 🏷️ **Category** | `forensics`              | 💯 **Points**  | `100`                               |
 | ⭐ **Difficulty** | ★★☆☆☆                    | 👤 **Author**  | `aodreamer`                         |
-| 🧑‍💻 **Team**    | `<isi nama tim>`         | 🛠️ **Tools**  | `python (sqlite3, pycryptodome)`    |
+| 🧑‍💻 **Team**    | `DOSCOM Zero Day Scholars` (nexsus404)         | 🛠️ **Tools**  | `python (sqlite3, pycryptodome)`    |
 | 🤖 **AI Source** | https://share.gemini.google/qwuktsUlIDg9 | 🧩 **Solver** | [`Cinder-solved.py`](Cinder-solved.py) |
 | 🔖 **Tags**      | `#sqlite` `#wal` `#android` `#aes-gcm` `#protobuf` | | |
 

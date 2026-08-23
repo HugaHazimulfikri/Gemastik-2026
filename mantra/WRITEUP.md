@@ -11,7 +11,7 @@ Writeup challenge **`mantra`**.
 | 🏆 **Event**     | `GEMASTIK XIX 2026`      | 📅 **Date**    | `2026-08-24`                        |
 | 🏷️ **Category** | `pwn / kernel`           | 💯 **Points**  | `481`                               |
 | ⭐ **Difficulty** | ★★★★☆                    | 👤 **Author**  | `hanzo`                             |
-| 🧑‍💻 **Team**    | `<isi nama tim>`         | 🛠️ **Tools**  | `objdump, gcc (-nostdlib), pwntools` |
+| 🧑‍💻 **Team**    | `DOSCOM Zero Day Scholars` (nexsus404)         | 🛠️ **Tools**  | `objdump, gcc (-nostdlib), pwntools` |
 | 🤖 **AI Source** | https://share.gemini.google/KxYrdoKVUwA0 | 🧩 **Solver** | [`solve_tiny.c`](solve_tiny.c) + [`exploit.py`](exploit.py) |
 | 🔖 **Tags**      | `#linux-kernel` `#null-deref` `#mmap_min_addr` `#modprobe_path` | | |
 

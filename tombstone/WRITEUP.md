@@ -11,7 +11,7 @@ Writeup challenge **`Tombstone`**.
 | 🏆 **Event**     | `GEMASTIK XIX 2026`      | 📅 **Date**    | `2026-08-24`                        |
 | 🏷️ **Category** | `forensics`              | 💯 **Points**  | `500`                               |
 | ⭐ **Difficulty** | ★★★★☆                    | 👤 **Author**  | `aodreamer`                         |
-| 🧑‍💻 **Team**    | `<isi nama tim>`         | 🛠️ **Tools**  | `debugfs, python (pycryptodome)`    |
+| 🧑‍💻 **Team**    | `DOSCOM Zero Day Scholars` (nexsus404)         | 🛠️ **Tools**  | `debugfs, python (pycryptodome)`    |
 | 🤖 **AI Source** | https://share.gemini.google/CUKyDMIPgQwT | 🧩 **Solver** | [`Tombstone-solved.py`](Tombstone-solved.py) |
 | 🔖 **Tags**      | `#ext4` `#crtime` `#xattr` `#anti-forensics` `#aes-gcm` | | |
 

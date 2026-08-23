@@ -11,7 +11,7 @@ Writeup challenge **`hexlock`**.
 | 🏆 **Event**     | `GEMASTIK XIX 2026`      | 📅 **Date**    | `2026-08-24`                        |
 | 🏷️ **Category** | `reverse`                | 💯 **Points**  | `500`                               |
 | ⭐ **Difficulty** | ★★★★☆                    | 👤 **Author**  | `wondping0`                         |
-| 🧑‍💻 **Team**    | `<isi nama tim>`         | 🛠️ **Tools**  | `objdump, gdb, pycryptodome`        |
+| 🧑‍💻 **Team**    | `DOSCOM Zero Day Scholars` (nexsus404)         | 🛠️ **Tools**  | `objdump, gdb, pycryptodome`        |
 | 🤖 **AI Source** | https://share.gemini.google/KGVvD7Uw2ofF | 🧩 **Solver** | [`hexlock-solved.py`](hexlock-solved.py) |
 | 🔖 **Tags**      | `#golang` `#garble` `#anti-debug` `#aes-gcm` | | |
 
