@@ -1,0 +1,131 @@
+import importlib.util
+import sys
+from Crypto.Cipher import AES
+
+print("[*] Memuat challenge.py menggunakan importlib...")
+spec = importlib.util.spec_from_file_location("challenge", "challenge.py")
+challenge = importlib.util.module_from_spec(spec)
+sys.modules["challenge"] = challenge
+spec.loader.exec_module(challenge)
+
+print("[*] Mengekstrak parameter kurva dan signature...")
+n = challenge.n
+G = challenge.G
+Q = challenge.Q
+nonce_bits_hint = challenge.nonce_bits_hint
+signatures = challenge.signatures
+flag_enc = challenge.flag_enc
+
+# Inisialisasi kurva secp256k1 dan angkat tuple ke titik kurva Sage
+p = 2**256 - 2**32 - 977
+E = EllipticCurve(GF(p), [0, 7])
+G_pt = E(G[0], G[1])
+Q_pt = E(Q[0], Q[1])
+
+# Sanity check parameter kurva
+assert n * G_pt == E(0), "[-] Sanity check gagal: n * G != O"
+print("[+] Sanity check kurva berhasil (n * G == O)")
+
+B = 2**nonce_bits_hint
+m = len(signatures)
+print(f"[+] Jumlah signature: {m} | Nonce bits hint: {nonce_bits_hint} | B: {B}")
+
+print("[*] Menghitung a_i dan t_i dengan recentering...")
+a_list = []
+t_list = []
+
+for sig in signatures:
+  if isinstance(sig, (list, tuple)):
+    _, _, h, r, s = sig
+  else:
+    h = sig.get("h")
+    r = sig.get("r")
+    s = sig.get("s")
+
+  s_inv = inverse_mod(s, n)
+  a = (s_inv * h) % n
+  t = (s_inv * r) % n
+
+  a_recentered = (a - B // 2) % n
+  a_list.append(a_recentered)
+  t_list.append(t)
+
+print("[*] Membangun matriks lattice HNP ((m+2) x (m+2))...")
+# Komentar Lattice HNP:
+# - Baris 0 hingga m-1: Kelipatan n pada diagonal untuk mereduksi modulo n.
+# - Baris m: Menyimpan koefisien t_i dan scaling factor B/n untuk variabel d.
+# - Baris m+1: Menyimpan koefisien a_i (recentered) dan scaling factor konstanta B.
+M = Matrix(QQ, m + 2, m + 2)
+
+for i in range(m):
+  M[i, i] = n
+
+for i in range(m):
+  M[m, i] = t_list[i]
+  M[m + 1, i] = a_list[i]
+
+M[m, m] = QQ(B) / QQ(n)
+M[m + 1, m + 1] = B
+
+print("[*] Menjalankan LLL reduction pada matriks lattice...")
+L = M.LLL()
+
+
+print(
+    "[*] Mencari private key d dari baris hasil LLL (mencoba semua baris &"
+    " kedua tanda)..."
+)
+found_d = None
+
+for row in L:
+  for sign in [1, -1]:
+    test_row = [sign * val for val in row]
+    val_m = test_row[m]
+
+    # Pastikan hasil kalkulasi rasional benar-benar bilangan bulat (integer)
+    cand_expr = (val_m * n) / B
+    if cand_expr in ZZ:
+      d_cand = int(ZZ(cand_expr) % n)
+      if d_cand > 0 and (ZZ(d_cand) * G_pt == Q_pt):
+        found_d = d_cand
+        break
+  if found_d is not None:
+    break
+
+if found_d is None:
+  print(
+      "[-] Gagal menemukan private key d yang valid dari hasil LLL. Pastikan"
+      " jumlah signature dan asumsi bit bias sudah tepat."
+  )
+  sys.exit(1)
+
+print(f"[+] Private key d berhasil ditemukan: {found_d}")
+print("[+] Verifikasi d * G == Q: BERHASIL")
+
+print("[*] Mendapatkan kunci AES dan mendekripsi flag dengan AES-GCM...")
+key = challenge.derive_key(found_d)
+
+# Ambil data dari flag_enc (mendukung format dict maupun attribute object)
+raw_nonce = (
+    flag_enc["nonce"] if isinstance(flag_enc, dict) else flag_enc.nonce
+)
+raw_ciphertext = (
+    flag_enc["ciphertext"]
+    if isinstance(flag_enc, dict)
+    else flag_enc.ciphertext
+)
+raw_tag = flag_enc["tag"] if isinstance(flag_enc, dict) else flag_enc.tag
+
+# Konversi string hex ke bytes
+nonce = bytes.fromhex(raw_nonce) if isinstance(raw_nonce, str) else raw_nonce
+ciphertext = (
+    bytes.fromhex(raw_ciphertext)
+    if isinstance(raw_ciphertext, str)
+    else raw_ciphertext
+)
+tag = bytes.fromhex(raw_tag) if isinstance(raw_tag, str) else raw_tag
+
+cipher = AES.new(key, AES.MODE_GCM, nonce=nonce)
+flag = cipher.decrypt_and_verify(ciphertext, tag)
+
+print(f"\n[+] FLAG BERHASIL DIDAPATKAN: {flag.decode('utf-8')}")

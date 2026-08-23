@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<map>
+    <string name="install_key">zFQ9GVudkfiHhytpG1zAl2B+DHLhE650mzYFCL+pqSI=</string>
+    <string name="kdf_salt">5n581xQBvjFW5FFDwj2stw==</string>
+    <int name="kdf_iters" value="120000" />
+    <string name="msg_cipher">AES-256-GCM</string>
+    <string name="aead_aad">thread:rowid</string>
+    <boolean name="biometric_lock" value="true" />
+    <long name="last_sync" value="1723640500" />
+</map>
