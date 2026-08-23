@@ -37,6 +37,26 @@ bocorin bug-nya: *not all pointers point somewhere, some point to zero*.
 
 ### 🔍 Reconnaissance
 
+Handout cuma satu file, `handout.zip`. Semua bahan analisis diekstrak dari situ:
+
+```bash
+$ unzip -l handout.zip
+    mantra.ko          # modul rentan (objdump/readelf)
+    rootfs.cpio.gz     # initramfs, login uid 1000
+    run.sh             # perintah qemu -> mitigasi
+    System.map         # tabel simbol kernel (alamat tetap krn nokaslr)
+    bzImage            # kernel Linux
+```
+
+Jadi `run.sh` datang langsung dari `handout.zip`. Tapi `init` (skrip setup korban) nggak ada di
+zip, dia di dalam initramfs `rootfs.cpio.gz`, jadi diekstrak dulu:
+
+```bash
+$ mkdir rootfs && cd rootfs
+$ zcat ../rootfs.cpio.gz | cpio -idm
+$ cat init
+```
+
 **Mitigasi dari `run.sh`:**
 
 ```bash
@@ -62,6 +82,7 @@ setsid cttyhack setuidgid 1000 /bin/sh       # kita = uid 1000
 ```
 
 ![Recon mantra](img/02-recon.png)
+![Recon mantra](img/03-recon.png)
 
 Jadi skenarionya klasik LPE: shell kita uid 1000, nggak bisa baca `/flag.txt` (0400 milik root),
 tapi `/dev/mantra` bisa diakses siapa aja. Harus eksploitasi modul buat naik jadi root.
