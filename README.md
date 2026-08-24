@@ -5,7 +5,6 @@ Writeup dan solver untuk **GEMASTIK XIX 2026 - Keamanan Siber (Penyisihan)**.
 Tiap folder soal berisi:
 
 - `WRITEUP.md` - writeup lengkap (recon, analisis, exploitation, flag)
-- `SUBMIT.md` - panduan submit + link chat AI
 - solver/exploit yang dipakai
 - `img/` - screenshot (soal, recon, flag)
 - file soal (attachment)
