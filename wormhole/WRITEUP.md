@@ -25,6 +25,8 @@
 - `http://15.232.64.175:13402` (HTTP frontend, uvicorn python)
 - `ws://15.232.64.175:13403` (WebSocket gateway, nodejs, di-map ke container port 9020)
 
+![Modal soal Wormhole](img/01-soal.png)
+
 ---
 
 ### 🔍 Reconnaissance (baca source code)
@@ -103,34 +105,58 @@ g = getattr(func, '__glob' + 'als__')   # lolos, filter ga nemu literal '__globa
 
 ### ⚔️ Exploitation (Chain -> Escalate -> Break)
 
-**Stage 1: race condition mint (wallet 100 -> ≥200).** Nonce protection atomic buat nonce sama,
-tapi nonce beda yang di-fire paralel semua sukses diproses (nggak ada lock atomic). Kirim 15 request
-paralel dengan nonce beda -> wallet naik cepat. Solver: [`solve_race.py`](solve_race.py).
+Kondisi awal: register dapat role `researcher`, wallet 100, dan tombol TERMINAL masih terkunci
+(supervisor only).
+
+![Dashboard awal: researcher, terminal terkunci](img/02-dashboard-researcher.png)
+
+**Stage 1: race condition mint (wallet 100 -> ≥200).** Vault mint dibatasi amount 1-100, dan mint
+normal cuma naikin wallet +10:
+
+![Form mint QC di vault](img/03-vault-mint.png)
+
+Nonce protection atomic buat nonce sama, tapi nonce beda yang di-fire paralel semua sukses diproses
+(nggak ada lock atomic). Kirim 15 request paralel dengan nonce beda -> wallet naik cepat. Solver:
+[`solve_race.py`](solve_race.py).
+
+![Race mint 15/15 sukses, wallet 100 -> 250](img/04-race-mint.png)
 
 ```
 wallet: 100 -> 250 (>= 200, lolos WS auth gate)
 ```
 
-**Stage 2: WS binary frame -> persist role supervisor.** Exploit Bug #2 (binary path skip role) +
-Bug #3 (persist role ke Redis). Kirim WS binary frame `device_config` dengan `role:supervisor`;
-`syncConfig` tulis `SET role:<user_id> "supervisor"` ke Redis, lalu re-login HTTP -> JWT supervisor.
-Frame format: `[type:1B=1][length:4B BE][payload UTF-8]`. Solver:
-[`stage2_ws_binary_frame.js`](stage2_ws_binary_frame.js).
+**Stage 2: WS binary frame -> persist role supervisor.** Di stream page ada form "DEVICE CONFIG
+MERGE (Supervisor Only)", tapi lewat WS binary frame role check-nya di-skip:
+
+![Form device config merge (supervisor only)](img/05-stream-configmerge.png)
+
+Exploit Bug #2 (binary path skip role) + Bug #3 (persist role ke Redis). Kirim WS binary frame
+`device_config` dengan `role:supervisor`; `syncConfig` tulis `SET role:<user_id> "supervisor"` ke
+Redis, lalu re-login HTTP -> JWT supervisor. Frame format: `[type:1B=1][length:4B BE][payload
+UTF-8]`. Solver: [`stage2_ws_binary_frame.js`](stage2_ws_binary_frame.js).
 
 ```
 {"type":"binary_config_updated","config":{"role":"supervisor","user_id":"admin",...}}
 # field role/user_id/authenticated/wallet muncul dari Object.prototype yang udah terpolusi
 ```
 
-Re-login:
+Re-login, sekarang role jadi supervisor:
 
 ```
 POST /api/auth/login  ->  {"status":"ok","role":"supervisor"}
 GET  /api/auth/me     ->  {"role":"supervisor","wallet":250}
 ```
 
-**Stage 3: sandbox escape -> RCE -> flag.** Sebagai supervisor, kirim payload ke
-`/api/terminal/execute` yang bypass AST filter via string concat:
+![/api/auth/me: role supervisor](img/06-me-supervisor.png)
+
+![Dashboard: role SUPERVISOR, terminal kebuka](img/07-dashboard-supervisor.png)
+
+**Stage 3: sandbox escape -> RCE -> flag.** Sebagai supervisor, terminal sandbox Python 3.12
+kebuka:
+
+![Simulation terminal (supervisor)](img/08-terminal-sandbox.png)
+
+Kirim payload ke `/api/terminal/execute` yang bypass AST filter via string concat:
 
 ```python
 subs = ().__class__.__bases__[0].__subclasses__()

@@ -18,6 +18,8 @@
 
 **📎 Attachment:** [`TZKS.hlpsl`](TZKS.hlpsl)
 
+![Modal soal TZKS](img/01-soal.png)
+
 ---
 
 ### 🔍 Reconnaissance
