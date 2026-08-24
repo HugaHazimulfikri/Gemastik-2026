@@ -42,7 +42,7 @@ victim.core:  ELF 64-bit LSB core file, x86-64, from './sensor'
 capture.pcap: pcap capture file (Ethernet)
 ```
 
-Aku parse pcap-nya manual (Ethernet + IPv4 + TCP), gabungin semua payload TCP searah. Dari 7 paket,
+Saya parse pcap-nya manual (Ethernet + IPv4 + TCP), gabungin semua payload TCP searah. Dari 7 paket,
 6 di antaranya cuma handshake sama teardown, cuma **satu paket yang bawa data: 51 byte**.
 
 ```
@@ -56,7 +56,7 @@ total payload: 51 byte
 
 ![Recon Ghost in the Core](img/02-recon.png)
 
-Aku cek juga konstanta kripto standar di core (`expand 32-byte k`, AES sbox), nggak ada satu pun.
+Saya cek juga konstanta kripto standar di core (`expand 32-byte k`, AES sbox), nggak ada satu pun.
 Jadi cipher-nya custom atau stream cipher sederhana.
 
 ---
@@ -73,7 +73,7 @@ $ readelf -n victim.core | grep -A1 sensor
 0x0000567ead19a000  0x0000567ead19b000  ...   (5 halaman)
 ```
 
-Jadi binary-nya ada di `/tmp/build.../sensor`. Aku carve 5 halaman itu dari core lewat magic ELF
+Jadi binary-nya ada di `/tmp/build.../sensor`. Saya carve 5 halaman itu dari core lewat magic ELF
 (mulai dari offset > 0x400 biar nggak ke-ambil header core-nya sendiri):
 
 ```python

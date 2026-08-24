@@ -36,7 +36,7 @@ Attachment: `fin-ws-04.img` (disk image ext4, 48 MB).
 ### 🔍 Reconnaissance
 
 `SOC_NOTE.md` bilang jejak gampangnya udah dibersihin: `auth.log` dipotong, journal systemd
-di-vacuum, `.bash_history` ilang. Aku baca isi image pakai The Sleuth Kit (tanpa mount, biar
+di-vacuum, `.bash_history` ilang. Saya baca isi image pakai The Sleuth Kit (tanpa mount, biar
 journal replay nggak ngerusak bukti):
 
 ```bash
@@ -55,7 +55,7 @@ r/r 34: usr/local/sbin/systemd-timesyncd-helper
 
 ![Recon Tombstone](img/02-recon.png)
 
-Yang aku catat:
+Yang saya catat:
 
 - `usr/local/sbin/systemd-timesyncd-helper` itu **masquerading**, namanya niru daemon systemd yang
   sah tapi ditaruh di `/usr/local/sbin`. Ini tool penyerangnya.

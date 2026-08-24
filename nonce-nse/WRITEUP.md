@@ -29,7 +29,7 @@ Writeup challenge **`Nonce-nse`**.
 Attachment cuma satu file: `challenge.py` (17 KB).
 
 Judulnya main kata: `Nonce-nse` kedengeran kayak *nonsense*, dan deskripsinya nyebut "tidak beres"
-pada tanda tangan digital. Dari situ aku udah nebak arahnya ke nonce ECDSA yang bermasalah.
+pada tanda tangan digital. Dari situ saya udah nebak arahnya ke nonce ECDSA yang bermasalah.
 
 ![Modal soal Nonce-nse](img/01-soal.png)
 
@@ -37,7 +37,7 @@ pada tanda tangan digital. Dari situ aku udah nebak arahnya ke nonce ECDSA yang 
 
 ### 🔍 Reconnaissance
 
-Pertama aku intip isi filenya:
+Pertama saya intip isi filenya:
 
 ```bash
 $ wc -l challenge.py
@@ -72,7 +72,7 @@ Isi `challenge.py` kira-kira begini:
 | `derive_key(d)` | turunin kunci AES dari private key `d` (HKDF-SHA256) |
 | `seal_flag(d, flag)` | fungsi enkripsi flag, udah disediain di file |
 
-Dari sini ada tiga hal yang aku catat:
+Dari sini ada tiga hal yang saya catat:
 
 - Kurvanya **secp256k1**. Nilai `n`-nya persis order standar (`p = 2^256 - 2^32 - 977`,
   `y² = x³ + 7`). `Q` public key, `G` generator biasa.
@@ -90,7 +90,7 @@ Persamaan ECDSA-nya:
 s = k⁻¹ · (h + r·d)   (mod n)
 ```
 
-Aku susun ulang biar jadi linier terhadap private key `d`:
+Saya susun ulang biar jadi linier terhadap private key `d`:
 
 ```
 k = s⁻¹·h  +  s⁻¹·r·d          (mod n)
@@ -118,7 +118,7 @@ Kombinasi `(baris_a) + d·(baris_t) − Σ cᵢ·(baris_n)` bakal ngasih vektor
 `v = (k₀, ..., k_{m-1}, d·B/n, B)`. Norm-nya sekitar `B·√(m+2)`, jauh lebih pendek dari vektor acak
 di lattice ini, jadi LLL bakal ketemu.
 
-Satu trik yang aku pakai: **recentering**, ganti `aᵢ` jadi `aᵢ − B/2` biar `kᵢ` geser ke
+Satu trik yang saya pakai: **recentering**, ganti `aᵢ` jadi `aᵢ − B/2` biar `kᵢ` geser ke
 `[−B/2, B/2)`. Norm targetnya turun sekitar setengah, jadi lebih gampang ketemu.
 
 Soal jumlah tanda tangan, rule of thumb-nya `m ≳ n_bits / bias_bits = 256/96 ≈ 3`. Soal ngasih 40,
@@ -190,7 +190,7 @@ nonce, ct, tag = (bytes.fromhex(flag_enc[k]) for k in ("nonce","ciphertext","tag
 flag = AES.new(key, AES.MODE_GCM, nonce=nonce).decrypt_and_verify(ct, tag)
 ```
 
-Aku pakai `decrypt_and_verify` (bukan `decrypt` biasa) biar tag GCM sekalian jadi bukti kuncinya
+Saya pakai `decrypt_and_verify` (bukan `decrypt` biasa) biar tag GCM sekalian jadi bukti kuncinya
 bener.
 
 ![Solver jalan sampai flag keluar](img/04-flag.png)
@@ -214,7 +214,7 @@ bener.
 [+] FLAG BERHASIL DIDAPATKAN: GEMASTIK19{hnp_sh0rt_b14s3d_n0nc3_l4tt1c3_g4t3d_kdf}
 ```
 
-Buat mastiin, aku rekonstruksi ulang tiap nonce `k = s⁻¹(h + r·d) mod n`. Bitlength-nya
+Buat mastiin, saya rekonstruksi ulang tiap nonce `k = s⁻¹(h + r·d) mod n`. Bitlength-nya
 `[160, 160, 156, ..., 157]`, maksimal 160 minimal 154. Semua di bawah 160 bit, jadi tebakan
 bias-nya bener.
 </details>

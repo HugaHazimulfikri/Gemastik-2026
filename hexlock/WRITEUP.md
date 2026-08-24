@@ -54,11 +54,11 @@ $ readelf -S hexlock | grep gopclntab
 
 ![Recon hexlock](img/02-recon.png)
 
-Yang aku catat:
+Yang saya catat:
 
 - Ini binary **Go**, statis dan stripped, ukuran ~1.5 MB. Ada `.gopclntab` (tabel simbol Go),
   tapi `main.*` sama versi `go1.x` kosong di strings. Curiga di-obfuscate.
-- Waktu aku parse `.gopclntab` manual, magic di `0xfbc60` isinya `0x831bae3e`, bukan magic Go mana
+- Waktu saya parse `.gopclntab` manual, magic di `0xfbc60` isinya `0x831bae3e`, bukan magic Go mana
   pun. Kelihatan sengaja dipatch. Tapi `nfunc = 1915` dan `textStart = 0x401000` cocok dengan VA
   `.text`, jadi layoutnya masih standar. Dari 1915 fungsi cuma 383 yang masih punya nama, sisanya
   `nameOff = 0`. Nama paket teracak. Ini ciri khas **garble**.
@@ -69,8 +69,8 @@ Yang aku catat:
 
 ### 🧠 Analisis
 
-**Nyari fungsi utama.** Nama `main.main` udah hilang, jadi aku lewat string. Cari `Wrong.` dan
-`Correct!` di `.rodata`, terus karena string Go direferensi lewat header `{ptr, len}`, aku cari
+**Nyari fungsi utama.** Nama `main.main` udah hilang, jadi saya lewat string. Cari `Wrong.` dan
+`Correct!` di `.rodata`, terus karena string Go direferensi lewat header `{ptr, len}`, saya cari
 pointer 8-byte yang nunjuk ke alamat string itu. Ketemu header `Wrong` di `0x4f7c90` dan `Correct`
 di `0x4f7c80`. Grep disassembly buat `lea` ke header itu, mendarat di `0x4ad074`/`0x4ad0e3`, dan
 fungsi induknya mulai di `0x4ace40`.
@@ -89,10 +89,10 @@ Di dalam `0x4acd40`: `aes.NewCipher` (key 16 byte) lalu `NewGCM` (nonce 12, tag 
 `AEAD.Seal(input)`. Jadi checkernya: **`AES-128-GCM Seal(input) == blob 66 byte`**. Karena output
 GCM = panjang input + 16 byte tag, dan blob-nya 66 byte, berarti **panjang flag = 50**.
 
-Bahan yang aku kumpulin:
+Bahan yang saya kumpulin:
 - nonce (statis di `0x567148`): `194b00b0922d969e007055a4`
 - blob pembanding (header `{ptr,len}` di `0x56f490`): 66 byte
-- key: dihitung runtime, jadi aku ambil lewat gdb breakpoint di `0x4acd77`
+- key: dihitung runtime, jadi saya ambil lewat gdb breakpoint di `0x4acd77`
 
 **Ini bagian yang bikin mentok.** Key hasil gdb dipakai buat `decrypt_and_verify`, hasilnya `MAC
 check failed`. Ternyata ada **dua proteksi** di fungsi derivasi key `0x4acba0`:

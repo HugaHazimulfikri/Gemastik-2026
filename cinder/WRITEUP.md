@@ -65,9 +65,9 @@ Dan ada `CASE_NOTE.md` yang bilang *"Work on a copy; keep the originals intact."
 
 ### 🧠 Analisis
 
-**Jebakan pertama: jangan buka chat.db langsung.** Aku sempat buka `chat.db` pakai modul sqlite3
+**Jebakan pertama: jangan buka chat.db langsung.** Saya sempat buka `chat.db` pakai modul sqlite3
 Python, dan file `chat.db-wal`-nya langsung ilang. Ternyata SQLite otomatis nge-checkpoint pas
-database dibuka, isi WAL disalin ke db utama terus file WAL-nya dihapus. Untung aku kerjain di
+database dibuka, isi WAL disalin ke db utama terus file WAL-nya dihapus. Untung saya kerjain di
 salinan. Jadi peringatan "work on a copy" di case note itu beneran teknis, bukan basa-basi.
 
 **Struktur pesan.** Tabel `messages` isinya 4 baris, kolom `body`-nya BLOB. Pas diintip ternyata
@@ -87,18 +87,18 @@ key = pbkdf2_hmac("sha256", b64decode(install_key), b64decode(kdf_salt), 120000,
 ```
 
 **AAD-nya template.** `"thread:rowid"` di prefs itu bukan literal, tapi template dua placeholder.
-Aku coba beberapa varian dan biarin tag GCM yang mutusin, yang lolos ternyata `f"{thread}:{rowid}"`,
+Saya coba beberapa varian dan biarin tag GCM yang mutusin, yang lolos ternyata `f"{thread}:{rowid}"`,
 misalnya `family:1`.
 
 Dengan itu 4 pesan kebuka, tapi isinya biasa aja (beli galon, resi paket). Di tabel `drafts` ada
 `GEMASTIK{th1s_dr4ft_n0t3_1s_4_d3c0y}`, tapi itu umpan, formatnya `GEMASTIK{` bukan `GEMASTIK19{`
 dan catatannya sendiri bilang "belum bener".
 
-**WAL-nya yang jadi kunci.** Aku parse header WAL-nya: page size 512, jadi tiap frame 536 byte, dan
+**WAL-nya yang jadi kunci.** Saya parse header WAL-nya: page size 512, jadi tiap frame 536 byte, dan
 `(5392 - 32) / 536 = 10` pas. Dari field `dbsize` tiap frame, frame 4 dan frame 9 nilainya 6
 (commit), sisanya 0. Berarti ada **dua transaksi**. SQLite cuma nerapin state terakhir.
 
-Pas aku rakit ulang state transaksi pertama (cuma frame 0 sampai 4), hasilnya beda jauh: kalau
+Pas saya rakit ulang state transaksi pertama (cuma frame 0 sampai 4), hasilnya beda jauh: kalau
 state akhir cuma punya id 1-4, state pertama punya delapan pesan, id 1-4 plus id 10-13 di thread
 baru `kurir`. Jadi tersangkanya ngehapus thread `kurir`, tapi penghapusan itu sendiri kan jadi
 transaksi baru, dan state sebelumnya tetep nyangkut di WAL.
