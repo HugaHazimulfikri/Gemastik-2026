@@ -6,7 +6,7 @@
 | ---------------- | ------------------ | -------------- | ---------------------- |
 | 🏆 **Event**     | `Gemastik 2026`    | 📅 **Date**    | `2026-08-23`           |
 | 🏷️ **Category** | `crypto`           | 💯 **Points**  | `100`                  |
-| 👤 **Author**    | `ac3`              | 🧑‍💻 **Team** | `DOSCOM`              |
+| 👤 **Author**    | `ac3`              | 🧑‍💻 **Team** | `DOSCOM Zero Day Scholars` (sanzxcte)              |
 
 ---
 

@@ -6,7 +6,7 @@
 | ---------------- | ------------------ | -------------- | ---------------------- |
 | 🏆 **Event**     | `Gemastik 2026`    | 📅 **Date**    | `2026-08-23`           |
 | 🏷️ **Category** | `Forensic`         | 💯 **Points**  | `473`                  |
-| 👤 **Author**    | `el es bebe stego merberto` | 🧑‍💻 **Team** | `DOSCOM`      |
+| 👤 **Author**    | `el es bebe stego merberto` | 🧑‍💻 **Team** | `DOSCOM Zero Day Scholars` (sanzxcte)      |
 
 ---
 
