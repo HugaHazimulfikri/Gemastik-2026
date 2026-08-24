@@ -6,8 +6,8 @@ Tiap folder soal berisi:
 
 - `WRITEUP.md` - writeup lengkap (recon, analisis, exploitation, flag)
 - solver/exploit yang dipakai
-- `img/` - screenshot (soal, recon, flag)
 - file soal (attachment)
+- `img/` - screenshot (soal, recon, flag) untuk sebagian soal
 
 ## Soal
 
@@ -19,3 +19,7 @@ Tiap folder soal berisi:
 | Tombstone | forensics | 500 | [tombstone/WRITEUP.md](tombstone/WRITEUP.md) |
 | Ghost in the Core | forensics | 384 | [ghost-in-the-core/WRITEUP.md](ghost-in-the-core/WRITEUP.md) |
 | mantra | pwn / kernel | 481 | [mantra/WRITEUP.md](mantra/WRITEUP.md) |
+| Afterimage | forensics | 473 | [afterimage/WRITEUP.md](afterimage/WRITEUP.md) |
+| wraith | reverse | 116 | [wraith/WRITEUP.md](wraith/WRITEUP.md) |
+| Ecliprime | crypto | 100 | [ecliprime/WRITEUP.md](ecliprime/WRITEUP.md) |
+| common-encoding | crypto | 100 | [common-encoding/WRITEUP.md](common-encoding/WRITEUP.md) |
