@@ -25,3 +25,6 @@ Tim: **DOSCOM Zero Day Scholars**.
 | wraith | reverse | 116 | sanzxct | [wraith/WRITEUP.md](wraith/WRITEUP.md) |
 | Ecliprime | crypto | 100 | sanzxct | [ecliprime/WRITEUP.md](ecliprime/WRITEUP.md) |
 | common-encoding | crypto | 100 | sanzxct | [common-encoding/WRITEUP.md](common-encoding/WRITEUP.md) |
+| BMN | web | 498 | x0rr-dan | [bmn/WRITEUP.md](bmn/WRITEUP.md) |
+| Wormhole | web | 408 | x0rr-dan | [wormhole/WRITEUP.md](wormhole/WRITEUP.md) |
+| TZKS | crypto | 499 | x0rr-dan | [tzks/WRITEUP.md](tzks/WRITEUP.md) |

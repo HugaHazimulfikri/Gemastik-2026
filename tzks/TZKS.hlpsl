@@ -1,0 +1,96 @@
+%% TZKS wire (JSON/line; ring elem = hex of n big-endian 3-byte coeffs mod q; vector = list):
+%%   {"cmd":"enroll"} -> {"c0"} ; {"cmd":"enroll_open","w","z1","z2"} -> {"ok"}
+%%   {"cmd":"prove","label"} -> {"w","c","z","a"}   (a: L public coeffs of label; z = y + c*<a,s>)
+%%   {"cmd":"auth","w"} -> {"c"} ; {"cmd":"auth_resp","z1","z2"} -> {"flag"}
+
+role authorizer (A, B      : agent,
+                 AA, T     : text,
+                 SND, RCV  : channel(dy))
+played_by B def=
+
+  local State           : nat,
+        C0, W0, Z1, Z2   : text
+
+  init State := 0
+
+  transition
+   issue. State = 0 /\ RCV(start) =|>
+          State' := 1 /\ C0' := new() /\ SND(C0')
+   open.  State = 1 /\ RCV(W0'.Z1'.Z2')
+            /\ add(mul(AA,Z1'), Z2') = add(W0, mul(C0,T)) =|>
+          State' := 2 /\ request(B, A, authz, C0)
+end role
+
+role alice (A, B      : agent,
+            AA, T     : text,
+            S, E      : text,
+            MASK, AGG : hash_func,
+            SND, RCV  : channel(dy))
+played_by A def=
+
+  local State               : nat,
+        Label, C, Y, W, U, Z : text
+
+  init State := 0
+
+  transition
+   prove. State = 0 /\ RCV(Label') =|>
+          State' := 0
+          /\ Y'  := MASK(S.E.Label')
+          /\ W'  := MASK(E.S.Label')
+          /\ U'  := AGG(Label'.S)
+          /\ C'  := new()
+          /\ Z'  := add(Y', mul(C', U'))
+          /\ SND(W'.C'.Z'.AGG(Label'))
+          /\ secret(S, wit_s, {A})
+          /\ secret(E, wit_e, {A})
+end role
+
+role bob (A, B      : agent,
+          AA, T     : text,
+          SND, RCV  : channel(dy))
+played_by B def=
+
+  local State        : nat,
+        W, C, Z1, Z2 : text
+
+  init State := 0
+
+  transition
+   commit. State = 0 /\ RCV(W') =|>
+           State' := 1 /\ C' := new() /\ SND(C')
+   check.  State = 1 /\ RCV(Z1'.Z2')
+             /\ add(mul(AA,Z1'), Z2') = add(W, mul(C,T)) =|>
+           State' := 2 /\ request(B, A, auth_ok, W)
+end role
+
+role session (A, B        : agent,
+              AA, T, S, E  : text,
+              MASK, AGG    : hash_func) def=
+  local SZ, RZ, SA, RA, SB, RB : channel(dy)
+  composition
+       authorizer(A, B, AA, T,               SZ, RZ)
+    /\ alice     (A, B, AA, T, S, E, MASK, AGG, SA, RA)
+    /\ bob       (A, B, AA, T,               SB, RB)
+end role
+
+role environment() def=
+  const a, t                 : text,
+        s, e                 : text,
+        mask, agg            : hash_func,
+        alice, bob           : agent,
+        authz, auth_ok       : protocol_id,
+        wit_s, wit_e         : protocol_id
+  intruder_knowledge = { alice, bob, a, t, mask, agg }
+  composition
+       session(alice, bob, a, t, s, e, mask, agg)
+    /\ session(alice, i,   a, t, s, e, mask, agg)
+end role
+
+goal
+  secrecy_of wit_s, wit_e
+  authentication_on authz
+  authentication_on auth_ok
+end goal
+
+environment()
