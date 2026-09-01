@@ -12,6 +12,10 @@ Kumpulan writeup & solver tim **DOSCOM Zero Day Scholars**
 ![Solved](https://img.shields.io/badge/SOLVED-13%20challenges-2a9d8f?style=for-the-badge)
 ![Category](https://img.shields.io/badge/kategori-5-457b9d?style=for-the-badge)
 
+<br>
+
+### 📖 [Baca writeup lengkap semua soal → `WRITEUP.md`](WRITEUP.md)
+
 </div>
 
 <br>
@@ -47,55 +51,50 @@ Kumpulan writeup & solver tim **DOSCOM Zero Day Scholars**
 
 ---
 
-## 📁 Isi tiap folder soal
+## 📚 Daftar Challenge
 
-> 📝 **`WRITEUP.md`** writeup lengkap (recon → analisis → exploitation → flag) &nbsp;·&nbsp;
-> 🧩 **solver / exploit** &nbsp;·&nbsp; 📎 **file soal** (bila ada) &nbsp;·&nbsp;
-> 🖼️ **`img/`** screenshot langkah
+Writeup lengkap ada di **[WRITEUP.md](WRITEUP.md)**. Tiap folder soal berisi solver/exploit,
+file soal (bila ada), dan `img/` screenshot.
 
 **Penanda solver:** 🔵 `nexsus404` &nbsp; 🟢 `sanzxct` &nbsp; 🟣 `x0rr-dan`
 
----
-
-## 📚 Daftar Writeup
-
 ### 🔐 Crypto <sup>`4`</sup>
 
-| Challenge | Poin | Solver | |
-| :-------- | :--: | :----- | :-- |
-| **Nonce-nse** | `500` | 🔵 nexsus404 | [📖 Writeup](nonce-nse/WRITEUP.md) |
-| **TZKS** | `499` | 🟣 x0rr-dan | [📖 Writeup](tzks/WRITEUP.md) |
-| **Ecliprime** | `100` | 🟢 sanzxct | [📖 Writeup](ecliprime/WRITEUP.md) |
-| **common-encoding** | `100` | 🟢 sanzxct | [📖 Writeup](common-encoding/WRITEUP.md) |
+| Challenge | Poin | Solver |
+| :-------- | :--: | :----- |
+| Nonce-nse | `500` | 🔵 nexsus404 |
+| TZKS | `499` | 🟣 x0rr-dan |
+| Ecliprime | `100` | 🟢 sanzxct |
+| common-encoding | `100` | 🟢 sanzxct |
 
 ### 🧩 Reverse <sup>`2`</sup>
 
-| Challenge | Poin | Solver | |
-| :-------- | :--: | :----- | :-- |
-| **hexlock** | `500` | 🔵 nexsus404 | [📖 Writeup](hexlock/WRITEUP.md) |
-| **wraith** | `116` | 🟢 sanzxct | [📖 Writeup](wraith/WRITEUP.md) |
+| Challenge | Poin | Solver |
+| :-------- | :--: | :----- |
+| hexlock | `500` | 🔵 nexsus404 |
+| wraith | `116` | 🟢 sanzxct |
 
 ### 🔎 Forensics <sup>`4`</sup>
 
-| Challenge | Poin | Solver | |
-| :-------- | :--: | :----- | :-- |
-| **Tombstone** | `500` | 🔵 nexsus404 | [📖 Writeup](tombstone/WRITEUP.md) |
-| **Afterimage** | `473` | 🟢 sanzxct | [📖 Writeup](afterimage/WRITEUP.md) |
-| **Ghost in the Core** | `384` | 🔵 nexsus404 | [📖 Writeup](ghost-in-the-core/WRITEUP.md) |
-| **Cinder** | `100` | 🔵 nexsus404 | [📖 Writeup](cinder/WRITEUP.md) |
+| Challenge | Poin | Solver |
+| :-------- | :--: | :----- |
+| Tombstone | `500` | 🔵 nexsus404 |
+| Afterimage | `473` | 🟢 sanzxct |
+| Ghost in the Core | `384` | 🔵 nexsus404 |
+| Cinder | `100` | 🔵 nexsus404 |
 
 ### 💥 Pwn / Kernel <sup>`1`</sup>
 
-| Challenge | Poin | Solver | |
-| :-------- | :--: | :----- | :-- |
-| **mantra** | `481` | 🔵 nexsus404 | [📖 Writeup](mantra/WRITEUP.md) |
+| Challenge | Poin | Solver |
+| :-------- | :--: | :----- |
+| mantra | `481` | 🔵 nexsus404 |
 
 ### 🌐 Web <sup>`2`</sup>
 
-| Challenge | Poin | Solver | |
-| :-------- | :--: | :----- | :-- |
-| **BMN** | `498` | 🟣 x0rr-dan | [📖 Writeup](bmn/WRITEUP.md) |
-| **Wormhole** | `408` | 🟣 x0rr-dan | [📖 Writeup](wormhole/WRITEUP.md) |
+| Challenge | Poin | Solver |
+| :-------- | :--: | :----- |
+| BMN | `498` | 🟣 x0rr-dan |
+| Wormhole | `408` | 🟣 x0rr-dan |
 
 ---
 
