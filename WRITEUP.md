@@ -262,13 +262,8 @@ GEMASTIK19{bmn_x55b0t_bl1ndsqli_p4thtr4v_w4fbyp455_cha1n3d}
 
 ---
 
-### 🔗 Referensi
+---
 
-- [PortSwigger — SQL Injection](https://portswigger.net/web-security/sql-injection)
-- [PortSwigger — Path Traversal](https://portswigger.net/web-security/file-path-traversal)
-- [PortSwigger — XSS](https://portswigger.net/web-security/cross-site-scripting)
-- [HTML `details` tag](https://www.w3schools.com/tags/tag_details.asp)
-- chat ai
 # 2. `Afterimage` — forensic
 
 ![Modal soal Afterimage](afterimage/img/01-soal.png)
@@ -445,11 +440,6 @@ if __name__ == "__main__":
 - ChaCha20 (RFC 8439) - https://www.rfc-editor.org/rfc/rfc8439
 
 ---
-
-### Referensi
-```
-https://gemini.google.com/share/bf2f5c6af478?skid=37e536b0-ec51-4002-a23c-26c99229a76d
-```
 
 ---
 
@@ -710,12 +700,8 @@ Flag GEMASTIK19{n3st3d_vm_MUL0_ant1z3_1nv_h4nd!!} berhasil dipulihkan secara ins
 
 ---
 
-### Referensi
-```
-https://share.gemini.google/Gr0g1s2O1Ahi
-```
-
 ---
+
 # 4. `Ecliprime` — crypto
 
 ![Modal soal Ecliprime](ecliprime/img/01-soal.png)
@@ -825,11 +811,8 @@ Setelah skrip di atas dijalankan menggunakan lingkungan SageMath (sage solve.sag
 
 ---
 
-### Referensi
-```
-https://share.gemini.google/vbAepMkkYjs1
-```
 ---
+
 # 5. `common-encoding` — crypto
 
 ![Modal soal common-encoding](common-encoding/img/01-soal.png)
@@ -929,11 +912,8 @@ Saat skrip dijalankan pada lingkungan terminal, proses parsing berhasil menerjem
 
 ---
 
-### Referensi
-```
-https://share.gemini.google/MMJvo7usWfKj
-```
 ---
+
 # 6. `Wormhole` — web
 
 ![Modal soal Wormhole](wormhole/img/01-soal.png)
@@ -1203,14 +1183,8 @@ GEMASTIK19{qu4ntum_r3l4y_pr0t0_p0llut10n_ch41n}
 
 ---
 
-### 🔗 Referensi
+---
 
-- [PortSwigger — Prototype Pollution](https://portswigger.net/web-security/prototype-pollution)
-- [PortSwigger — Race Conditions](https://portswigger.net/web-security/race-conditions)
-- [PortSwigger — WebSocket vulnerabilities](https://portswigger.net/web-security/websockets)
-- [Python Sandbox Escape — HackTricks](https://book.hacktricks.xyz/generic-methodologies-and-resources/python/bypass-python-sandboxes)
-- [Python `ast` module docs](https://docs.python.org/3/library/ast.html)
-- chat ai
 # 7. `Cinder` — forensics
 
 
@@ -1620,11 +1594,7 @@ vault key: GEMASTIK19{n0t_burn3d_just_h1d1ng_1n_th3_w4l}
 
 ---
 
-### Referensi
-- SQLite WAL format - https://www.sqlite.org/wal.html
-- AES-GCM (NIST SP 800-38D) - https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38d.pdf
-- Protobuf encoding - https://protobuf.dev/programming-guides/encoding/
-- PBKDF2-HMAC-SHA256 (RFC 2898) - https://www.rfc-editor.org/rfc/rfc2898
+---
 
 # 8. `Ghost in the Core` — forensics
 
@@ -1918,11 +1888,7 @@ GEMASTIK19{gh0st_1n_th3_c0re_rc4_s4lt_fr0m_3nv1r0n}
 
 ---
 
-### Referensi
-- Core dump analysis (Linux) - https://www.gnu.org/software/gdb/documentation/
-- PCAP file format - https://www.tcpdump.org/pcap.html
-- RC4 cipher (RFC 6229) - https://www.rfc-editor.org/rfc/rfc6229
-- readelf NT_FILE mapping - https://refspecs.linuxbase.org/elf/elf.html
+---
 
 # 9. `hexlock` — reverse
 
@@ -2210,11 +2176,7 @@ Byte ke-5 key: dari gdb `0xd6`, yang bener `0x5e`. Key asli: `7f8a7205095edb1151
 
 ---
 
-### Referensi
-- garble obfuscator - https://github.com/burrowers/garble
-- AES-GCM (RFC 5116) - https://www.rfc-editor.org/rfc/rfc5116
-- Go binary reverse engineering - https://www.codereversing.com/archives/1552
-- Anti-debug TracerPid - https://anti-debug.checkpoint.com/
+---
 
 # 10. `mantra` — pwn / kernel
 
@@ -2647,11 +2609,7 @@ GEMASTIK19{n0t_4ll_p01nt3rs_p01nt_s0m3wh3r3_s0m3_p01nt_t0_z3r0}
 
 ---
 
-### Referensi
-- Linux kernel exploitation - https://pawnyable.co.uk/
-- modprobe_path overwrite - https://0x00sec.org/t/kernel-exploit-modprobe-path/
-- NULL pointer dereference - https://www.cs.ucdavis.edu/research/tech-reports/2007/
-- mmap_min_addr bypass - https://lwn.net/Articles/430372/
+---
 
 # 11. `Nonce-nse` — crypto
 
@@ -2999,12 +2957,8 @@ bias-nya bener.
 
 ---
 
-### Referensi
-- Hidden Number Problem (HNP) - https://link.springer.com/chapter/10.1007/978-3-540-24647-5_25
-- LLL lattice reduction - https://en.wikipedia.org/wiki/Lenstra%E2%80%93Lenstra%E2%80%93Lov%C3%A1sz_lattice_basis_reduction_algorithm
-- ECDSA nonce bias - https://eprint.iacr.org/2019/023
-- secp256k1 curve - https://en.bitcoin.it/wiki/Secp256k1
 ---
+
 # 12. `Tombstone` — forensics
 
 
@@ -3371,12 +3325,7 @@ vault unlocked -> GEMASTIK19{th3_cl0ck_l13d_but_th3_1n0d3_d1dnt}
 
 ---
 
-### Referensi
-- ext4 filesystem layout - https://www.kernel.org/doc/html/latest/filesystems/ext4/
-- ext4 crtime (birth time) - https://ext4.wiki.kernel.org/index.php/Ext4_Data_Structures_Layout
-- Extended attributes (xattr) - https://www.freedesktop.org/wiki/CommonExtendedAttributes/
-- debugfs manual - https://man7.org/linux/man-pages/man8/debugfs.8.html
-- The Sleuth Kit (TSK) - https://sleuthkit.org/
+---
 
 # 13. `TZKS` — crypto
 
@@ -3543,9 +3492,3 @@ aman di bawah gamma. Hasilnya `130924 < 131072`, lolos.
 GEMASTIK19{r353t_th3_pr0v3r_l34k_m0dul3_lw3_w1tn3ss_th3n_1mp3rs0n4t3}
 ```
 
-### 🔗 Referensi
-
-- HLPSL language (AVISPA) - https://avispa-project.inrialpes.fr/
-- Module-LWE / Dilithium - https://pq-crystals.org/dilithium/
-- Fiat-Shamir transform - https://en.wikipedia.org/wiki/Fiat%E2%80%93Shamir_heuristic
-- Negacyclic convolution - https://www.math.clemson.edu/~sgao/papers/
