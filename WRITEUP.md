@@ -269,6 +269,7 @@ GEMASTIK19{bmn_x55b0t_bl1ndsqli_p4thtr4v_w4fbyp455_cha1n3d}
 - chat ai
 # 2. `Afterimage` — forensic
 
+![Modal soal Afterimage](afterimage/img/01-soal.png)
 
 ---
 
@@ -452,6 +453,7 @@ https://gemini.google.com/share/bf2f5c6af478?skid=37e536b0-ec51-4002-a23c-26c992
 
 # 3. `wraith` — reverse
 
+![Modal soal wraith](wraith/img/01-soal.png)
 
 ---
 
@@ -714,6 +716,7 @@ https://share.gemini.google/Gr0g1s2O1Ahi
 ---
 # 4. `Ecliprime` — crypto
 
+![Modal soal Ecliprime](ecliprime/img/01-soal.png)
 
 ---
 
@@ -827,6 +830,7 @@ https://share.gemini.google/vbAepMkkYjs1
 ---
 # 5. `common-encoding` — crypto
 
+![Modal soal common-encoding](common-encoding/img/01-soal.png)
 
 ---
 
