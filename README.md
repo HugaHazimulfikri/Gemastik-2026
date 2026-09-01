@@ -31,21 +31,21 @@
 <tr>
 <td align="center" width="210">
 <a href="https://github.com/sanzxct"><img src="https://github.com/sanzxct.png" width="100" alt="sanzxcte"></a><br>
-🥇 <a href="https://github.com/sanzxct"><b>sanzxcte</b></a><br>
-<sub>@sanzxct</sub><br>
-<img src="https://img.shields.io/badge/skor-789-E5B80B?style=flat-square">
+<a href="https://github.com/sanzxct"><b>sanzxcte</b></a><br>
+<sub>@sanzxct</sub><br><br>
+<img src="https://img.shields.io/badge/skor-789-2a9d8f?style=for-the-badge">
 </td>
 <td align="center" width="210">
 <a href="https://github.com/HugaHazimulfikri"><img src="https://github.com/HugaHazimulfikri.png" width="100" alt="nexsus404"></a><br>
-🥈 <a href="https://github.com/HugaHazimulfikri"><b>nexsus404</b></a><br>
-<sub>@HugaHazimulfikri</sub><br>
-<img src="https://img.shields.io/badge/skor-766-9EA0A3?style=flat-square">
+<a href="https://github.com/HugaHazimulfikri"><b>nexsus404</b></a><br>
+<sub>@HugaHazimulfikri</sub><br><br>
+<img src="https://img.shields.io/badge/skor-766-457b9d?style=for-the-badge">
 </td>
 <td align="center" width="210">
 <a href="https://github.com/x0rr-dan"><img src="https://github.com/x0rr-dan.png" width="100" alt="x0r aka teto"></a><br>
-🥉 <a href="https://github.com/x0rr-dan"><b>x0r aka teto</b></a><br>
-<sub>@x0rr-dan</sub><br>
-<img src="https://img.shields.io/badge/skor-330-CD7F32?style=flat-square">
+<a href="https://github.com/x0rr-dan"><b>x0r aka teto</b></a><br>
+<sub>@x0rr-dan</sub><br><br>
+<img src="https://img.shields.io/badge/skor-330-8a2be2?style=for-the-badge">
 </td>
 </tr>
 </table>
@@ -66,8 +66,8 @@
 
 ### 🔐 Crypto <sup>`4`</sup>
 
-| Challenge | Poin | Solver |
-| :-------- | :--: | :----- |
+| Challenge | Poin | |
+| :-------- | :--: | :-: |
 | Nonce-nse | `500` | 🔵 |
 | TZKS | `499` | 🟣 |
 | Ecliprime | `100` | 🟢 |
@@ -75,23 +75,23 @@
 
 ### 🧩 Reverse <sup>`2`</sup>
 
-| Challenge | Poin | Solver |
-| :-------- | :--: | :----- |
+| Challenge | Poin | |
+| :-------- | :--: | :-: |
 | hexlock | `500` | 🔵 |
 | wraith | `116` | 🟢 |
 
 ### 💥 Pwn / Kernel <sup>`1`</sup>
 
-| Challenge | Poin | Solver |
-| :-------- | :--: | :----- |
+| Challenge | Poin | |
+| :-------- | :--: | :-: |
 | mantra | `481` | 🔵 |
 
 </td><td valign="top" width="50%">
 
 ### 🔎 Forensics <sup>`4`</sup>
 
-| Challenge | Poin | Solver |
-| :-------- | :--: | :----- |
+| Challenge | Poin | |
+| :-------- | :--: | :-: |
 | Tombstone | `500` | 🔵 |
 | Afterimage | `473` | 🟢 |
 | Ghost in the Core | `384` | 🔵 |
@@ -99,8 +99,8 @@
 
 ### 🌐 Web <sup>`2`</sup>
 
-| Challenge | Poin | Solver |
-| :-------- | :--: | :----- |
+| Challenge | Poin | |
+| :-------- | :--: | :-: |
 | BMN | `498` | 🟣 |
 | Wormhole | `408` | 🟣 |
 
